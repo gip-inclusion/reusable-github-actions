@@ -1,0 +1,34 @@
+name: "Deploy an app to scalingo using it's github tar.gz link"
+
+on:
+  workflow_call:
+    inputs:
+      appName:
+        required: true
+        type: string
+      targzUrl:
+        required: true
+        type: string
+      region:
+        required: false
+        type: string
+        default: "osc-fr1"
+    
+    secrets:
+      SCALINGO_API_TOKEN:
+        required: true
+
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install scalingo CLI
+        run: |
+          wget -qO- https://cli-dl.scalingo.com/install.sh | bash
+          echo "$HOME/bin" >> $GITHUB_PATH
+      - name: Login to scalingo
+        run: scalingo login --api-token ${{ secrets.SCALINGO_API_TOKEN }}
+      - name: Deploy to scalingo
+        run: scalingo --app ${{ inputs.appName }} --region ${{ inputs.region }} deploy ${{ inputs.targzUrl }}
+
